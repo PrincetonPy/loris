@@ -5,7 +5,12 @@
 #
 # Command line tool for extracting dumping iiif info.json to stdout.
 #
-# Syntax: $ get_info_json path/to/an/image.jp2
+# Syntax: $ get_info_json [-v] path/to/an/image.jp2
+#	-v will show loris's debug logging.
+#
+#
+# This tool does not report a profile or formats available as they are
+# depend on the server.
 #
 
 from json import dumps
@@ -35,6 +40,13 @@ except ImportError:
 EX_USAGE = 64
 EX_DATAERR = 65 
 EX_NOINPUT = 66
+VERBOSE = '-v'
+
+
+if VERBOSE in argv:
+	import logging
+	logging.basicConfig(level=logging.DEBUG)
+	argv.remove(VERBOSE)
 
 try:
 	fp = realpath(argv[1])
