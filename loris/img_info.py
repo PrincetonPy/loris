@@ -256,6 +256,8 @@ class ImageInfo(object):
 				y = i >> 4
 				self.tile_width = 2**x
 				self.tile_height = 2**y
+				logger.debug("using tile width from precint: " + str(self.tile_width))
+				logger.debug("using tile height from precint: " + str(self.tile_height))
 
 				# Still debugging...this prints all levels
 				# for _ in range(levels+1):
