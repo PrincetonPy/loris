@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 #-*-coding:utf-8-*-
 
-# iiif_image_info
+# iiif_img_info
 #
 # Command line tool for extracting dumping iiif info.json to stdout.
 #
-# Syntax: $ get_info_json [-v] path/to/an/image.jp2
+# Syntax: $ iiif_img_info [-v] path/to/an/image.fmt
 #	-v will show loris's debug logging.
 #
-#
 # This tool does not report a profile or formats available as they are
-# depend on the server.
+# depend on the server. The file extension must be a conventional image format
+# extension, e.g.: jpg, jp2, tif
 #
 
 from json import dumps
