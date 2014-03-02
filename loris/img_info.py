@@ -238,11 +238,7 @@ class ImageInfo(object):
 			# y = h ** 2
 		jp2.close()
 
-	def to_json(self):
-		'''Serialize as json.
-		Returns:
-			str (json)
-		'''
+	def to_dict(self):
 		d = {}
 		d['@context'] = 'http://library.stanford.edu/iiif/image-api/1.1/context.json'
 		d['@id'] = self.ident
@@ -257,6 +253,14 @@ class ImageInfo(object):
 		d['formats'] = self.formats
 		d['qualities'] = self.qualities
 		d['profile'] = COMPLIANCE
+		return d
+
+	def to_json(self):
+		'''Serialize as json.
+		Returns:
+			str (json)
+		'''
+		d = self.to_dict()
 		return json.dumps(d)
 
 class InfoCache(object):
