@@ -52,7 +52,7 @@ class ImageInfo(object):
 		'src_img_fp', 'color_profile_bytes')
 
 	@staticmethod
-	def from_image_file(ident, uri, src_img_fp, src_format, formats=[]):
+	def from_image_file(uri, src_img_fp, src_format, formats=[]):
 		'''
 		Args:
 			ident (str): The URI for the image.
@@ -230,6 +230,12 @@ class ImageInfo(object):
 			levels = int(struct.unpack(">B", jp2.read(1))[0])
 			logger.debug("levels: " + str(levels))	
 			self.scale_factors = [pow(2, l) for l in range(0,levels+1)]
+			# TODO: need to pull out precincts. See spec page 24.
+			# To get the byte do int("{byte}", 2)
+			# x = byte&15
+			# y = byte >> 4
+			# w = x ** 2
+			# y = h ** 2
 		jp2.close()
 
 	def to_json(self):
