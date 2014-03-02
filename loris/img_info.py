@@ -153,6 +153,8 @@ class ImageInfo(object):
 		'''
 		logger.debug('Extracting info from JP2 file.')
 		self.qualities = ['native', 'bitonal']
+		scod_is_0 = True
+		scoc_is_0 = True # TODO. 
 
 		jp2 = open(fp, 'rb')
 		b = jp2.read(1)
@@ -210,7 +212,7 @@ class ImageInfo(object):
 
 		b = jp2.read(1)
 		while (ord(b) != 0xFF):	b = jp2.read(1)
-		b = jp2.read(1) #skip over the SOC, 0x4F 
+		b = jp2.read(1) #skip over the SOC and 0x4F 
 		
 		while (ord(b) != 0xFF):	b = jp2.read(1)
 		b = jp2.read(1) # 0x51: The SIZ marker segment
@@ -221,22 +223,60 @@ class ImageInfo(object):
 			self.tile_width = int(struct.unpack(">I", jp2.read(4))[0]) # XTsiz (32)
 			self.tile_height = int(struct.unpack(">I", jp2.read(4))[0]) # YTsiz (32)
 			logger.debug("tile width: " + str(self.tile_width))
-			logger.debug("tile height: " + str(self.tile_height))	
+			logger.debug("tile height: " + str(self.tile_height))
+			jp2.read(4) # XTOsiz (32)
+			jp2.read(4) # YTOsiz (32)
+			csiz = struct.unpack(">h", jp2.read(2)) # may need this later
 
 		while (ord(b) != 0xFF):	b = jp2.read(1)
 		b = jp2.read(1) # 0x52: The COD marker segment
 		if (ord(b) == 0x52):
-			jp2.read(7) # through Lcod, Scod, SGcod (16 + 8 + 32 = 56 bits)
+			jp2.read(2) # through Lcod (16)
+			jp2.read(1) # Scod (8)
+			jp2.read(4) # SGcod (32)
 			levels = int(struct.unpack(">B", jp2.read(1))[0])
 			logger.debug("levels: " + str(levels))	
 			self.scale_factors = [pow(2, l) for l in range(0,levels+1)]
+			jp2.read(4) # through code block stuff
+
+			# We may have precincts if Scod or Scoc = xxxx xxx0
+			# But we don't need to examine as this is the last variable in the 
+			# COD segment. Instead check if the next byte == 0xFF. If it is, 
+			# we don't have a Precint size parameter and we've moved on to either
+			# the COC (optional, marker = 0xFF53) or the QCD (required,
+			# marker = 0xFF5C)
+			b = jp2.read(1)
+			if ord(b) != 0xFF and self.tile_width == self.width and self.tile_height == self.height:
+				[jp2.read(1) for _ in range(levels-1)]
+				# This CAN'T all be necessary
+				b = jp2.read(1)
+				b_str = bin(struct.unpack(">B", b)[0])[2:].zfill(8)
+				i = int(b_str,2)
+				x = i&15
+				y = i >> 4
+				self.tile_width = 2**x
+				self.tile_height = 2**y
+
+				# Still debugging...this prints all levels
+				# for _ in range(levels+1):
+				# 	# This CAN'T all be necessary
+				# 	i = int(bin(struct.unpack(">B", b)[0])[2:].zfill(8),2)
+				# 	x = i&15
+				# 	y = i >> 4
+				# 	w = 2**x
+				# 	h = 2**y
+				# 	b = jp2.read(1)
+				# 	print "{%d,%d}" % (w,h)
+
 			# TODO: need to pull out precincts. See spec page 24.
 			# To get the byte do int("{byte}", 2)
 			# x = byte&15
 			# y = byte >> 4
-			# w = x ** 2
+			# w = x ** 2 # maybe these are reversed? (2**x instead?)
 			# y = h ** 2
 		jp2.close()
+
+
 
 	def to_dict(self):
 		d = {}
