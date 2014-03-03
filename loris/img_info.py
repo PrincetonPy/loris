@@ -261,7 +261,6 @@ class ImageInfo(object):
 
 				# Still debugging...this prints all levels
 				# for _ in range(levels+1):
-				# 	# This CAN'T all be necessary
 				# 	i = int(bin(struct.unpack(">B", b)[0])[2:].zfill(8),2)
 				# 	x = i&15
 				# 	y = i >> 4
@@ -270,12 +269,7 @@ class ImageInfo(object):
 				# 	b = jp2.read(1)
 				# 	print "{%d,%d}" % (w,h)
 
-			# TODO: need to pull out precincts. See spec page 24.
-			# To get the byte do int("{byte}", 2)
-			# x = byte&15
-			# y = byte >> 4
-			# w = x ** 2 # maybe these are reversed? (2**x instead?)
-			# y = h ** 2
+
 		jp2.close()
 
 
